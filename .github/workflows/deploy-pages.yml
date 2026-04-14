@@ -64,11 +64,13 @@ jobs:
       
       - name: Create deployment directory
         run: |
-          mkdir -p deploy
-          # Copy entire repo content to deploy (file browser will use this)
-          cp -r . deploy/
-          # Remove git and workflow files from deployment
-          rm -rf deploy/.git deploy/.github deploy/.gitignore
+          mkdir -p deploy/scripts
+          # Copy configuration directories and files
+          cp -r .opencode deploy/ 2>/dev/null || true
+          cp -r shared-config deploy/ 2>/dev/null || true
+          cp -r python deploy/ 2>/dev/null || true
+          cp README.md DEVELOPER_GUIDE.md opencode.json deploy/ 2>/dev/null || true
+          cp scripts/generate_*.py deploy/scripts/ 2>/dev/null || true
           echo "Created deployment directory"
       
       - name: Download all distribution artifacts
