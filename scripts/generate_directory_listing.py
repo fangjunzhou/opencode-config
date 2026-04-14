@@ -17,6 +17,8 @@ import os
 import sys
 from pathlib import Path
 from datetime import datetime
+import re
+import html as html_module
 
 
 def should_include_path(path, name):
@@ -41,6 +43,61 @@ def format_size(size):
             return f"{size:.1f}{unit}"
         size /= 1024
     return f"{size:.1f}TB"
+
+
+def markdown_to_html(markdown_text):
+    """Convert basic markdown to HTML."""
+    lines = markdown_text.split('\n')
+    html_lines = []
+    in_code_block = False
+    code_block_content = []
+    
+    for line in lines:
+        # Code blocks
+        if line.strip().startswith('```'):
+            if in_code_block:
+                html_lines.append(f'<pre><code>{"".join(code_block_content)}</code></pre>')
+                code_block_content = []
+                in_code_block = False
+            else:
+                in_code_block = True
+            continue
+        
+        if in_code_block:
+            code_block_content.append(html_module.escape(line) + '\n')
+            continue
+        
+        # Headers
+        if line.startswith('# '):
+            html_lines.append(f'<h2>{html_module.escape(line[2:].strip())}</h2>')
+        elif line.startswith('## '):
+            html_lines.append(f'<h3>{html_module.escape(line[3:].strip())}</h3>')
+        elif line.startswith('### '):
+            html_lines.append(f'<h4>{html_module.escape(line[4:].strip())}</h4>')
+        # Bold
+        elif line.strip().startswith('- '):
+            html_lines.append(f'<li>{html_module.escape(line[2:].strip())}</li>')
+        # Paragraphs
+        elif line.strip():
+            # Inline code
+            text = html_module.escape(line.strip())
+            text = re.sub(r'`([^`]+)`', r'<code>\1</code>', text)
+            # Bold
+            text = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', text)
+            # Italic
+            text = re.sub(r'\*([^*]+)\*', r'<em>\1</em>', text)
+            # Links
+            text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', text)
+            html_lines.append(f'<p>{text}</p>')
+        else:
+            # Empty line
+            html_lines.append('')
+    
+    # Wrap lists
+    result = '\n'.join(html_lines)
+    result = re.sub(r'(<li>.*?</li>)', lambda m: '<ul>' + m.group(1) + '</ul>' if not re.search(r'</ul>.*<li>', result) else m.group(1), result, flags=re.DOTALL)
+    
+    return result
 
 
 def generate_file_tree(start_path, root_path, indent=0):
@@ -82,10 +139,11 @@ def generate_index_html(repo_root):
     """Generate main index.html."""
     
     readme_path = os.path.join(repo_root, 'README.md')
-    readme_content = ""
+    readme_html = ""
     if os.path.exists(readme_path):
         with open(readme_path, 'r') as f:
-            readme_content = f.read()
+            readme_markdown = f.read()
+            readme_html = markdown_to_html(readme_markdown)
     
     file_tree = generate_file_tree(repo_root, repo_root)
     
@@ -135,15 +193,25 @@ def generate_index_html(repo_root):
         .file-tree a {{ color: #0066cc; text-decoration: none; }}
         .file-tree a:hover {{ text-decoration: underline; }}
         
-        .readme-section h2 {{ font-size: 20px; margin-bottom: 15px; color: #0066cc; }}
-        .readme-section code {{ background: #f5f5f5; padding: 2px 6px; border-radius: 3px; }}
-        .readme-section pre {{
-            background: #f5f5f5;
-            padding: 12px;
-            border-radius: 3px;
-            overflow-x: auto;
-            margin: 10px 0;
-        }}
+         .readme-section h2 {{ font-size: 20px; margin-bottom: 15px; color: #0066cc; }}
+         .readme-section h3 {{ font-size: 16px; margin-top: 20px; margin-bottom: 10px; color: #0066cc; }}
+         .readme-section h4 {{ font-size: 14px; margin-top: 15px; margin-bottom: 8px; color: #555; }}
+         .readme-section p {{ margin-bottom: 12px; }}
+         .readme-section ul {{ margin-left: 20px; margin-bottom: 12px; }}
+         .readme-section li {{ margin-bottom: 6px; }}
+         .readme-section code {{ background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-family: monospace; }}
+         .readme-section pre {{
+             background: #f5f5f5;
+             padding: 12px;
+             border-radius: 3px;
+             overflow-x: auto;
+             margin: 10px 0;
+             font-family: monospace;
+             font-size: 12px;
+             line-height: 1.4;
+         }}
+         .readme-section a {{ color: #0066cc; text-decoration: none; }}
+         .readme-section a:hover {{ text-decoration: underline; }}
         
         footer {{
             text-align: center;
@@ -164,12 +232,12 @@ def generate_index_html(repo_root):
     </header>
     
     <div class="container">
-        <div class="readme-section">
-            <h2>About This Repository</h2>
-            <div style="line-height: 1.8;">
-                {readme_content or '<p>OpenCode configuration repository</p>'}
-            </div>
-        </div>
+         <div class="readme-section">
+             <h2>About This Repository</h2>
+             <div style="line-height: 1.8;">
+                 {readme_html or '<p>OpenCode configuration repository</p>'}
+             </div>
+         </div>
         
         <div class="file-tree-section">
             <h2>Complete File Tree</h2>
