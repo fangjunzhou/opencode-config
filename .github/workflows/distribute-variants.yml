@@ -77,24 +77,11 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: distributions/
+          name: github-pages-distributions
   
-  deploy-distributions:
-    name: Deploy Distributions to GitHub Pages
-    needs: create-index
-    runs-on: ubuntu-latest
-    
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}/distributions/
-    
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
   notify:
     name: Build Summary
-    needs: [build-distributions, create-index, deploy-distributions]
+    needs: [build-distributions, create-index]
     runs-on: ubuntu-latest
     if: always()
     
@@ -105,7 +92,5 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Build Result**: ${{ needs.build-distributions.result }}" >> $GITHUB_STEP_SUMMARY
           echo "**Index Creation**: ${{ needs.create-index.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Deployment**: ${{ needs.deploy-distributions.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📦 **Distributions Available At**:" >> $GITHUB_STEP_SUMMARY
-          echo "https://github.com/${{ github.repository }}/deployments" >> $GITHUB_STEP_SUMMARY
+          echo "Distributions ready for deployment" >> $GITHUB_STEP_SUMMARY

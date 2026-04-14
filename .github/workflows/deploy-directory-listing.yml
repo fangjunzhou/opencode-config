@@ -187,7 +187,7 @@ jobs:
           <body>
               <header>
                   <div class="container">
-                      <h1>🔧 OpenCode Configuration Browser</h1>
+                      <h1>OpenCode Configuration Browser</h1>
                       <p class="subtitle">Browse configurations, agents, and commands</p>
                   </div>
               </header>
@@ -201,15 +201,15 @@ jobs:
                   </div>
                   
                   <div class="file-tree-section">
-                      <h2>📂 Complete File Tree</h2>
+                      <h2>Complete File Tree</h2>
                       <div class="file-tree">
           {'<br>'.join(file_tree)}
                       </div>
                   </div>
                   
                   <footer>
-                      <p>🔗 Repository: <a href="https://github.com/fangjun/opencode-config">fangjun/opencode-config</a></p>
-                      <p>📖 <a href="./distributions/">Download Distributions</a> | <a href="./shared-config/">Shared Config</a> | <a href="./.opencode/">.opencode Directory</a></p>
+                      <p>Repository: <a href="https://github.com/fangjun/opencode-config">fangjunzhou/opencode-config</a></p>
+                      <p><a href="./distributions/">Download Distributions</a> | <a href="./shared-config/">Shared Config</a> | <a href="./.opencode/">.opencode Directory</a></p>
                       <p style="margin-top: 20px; font-size: 12px;">Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
                   </footer>
               </div>
@@ -226,7 +226,7 @@ jobs:
               with open(os.path.join(repo_root, 'index.html'), 'w') as f:
                   f.write(html)
               
-              print(f"✓ Generated index.html for {repo_root}")
+              print(f"Generated index.html for {repo_root}")
           EOF
           
           python3 /tmp/generate_listings.py .
@@ -239,17 +239,4 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
-  
-  deploy-pages:
-    name: Deploy to GitHub Pages
-    needs: generate-listing
-    runs-on: ubuntu-latest
-    
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          name: github-pages-listing
