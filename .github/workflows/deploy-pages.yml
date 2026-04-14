@@ -1,11 +1,8 @@
-name: Deploy Directory Listing to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'scripts/build-distributions.sh'
-      - '.github/workflows/distribute-variants.yml'
   workflow_dispatch:
 
 permissions:
@@ -14,9 +11,13 @@ permissions:
   contents: read
 
 jobs:
-  generate-listing:
-    name: Generate Directory Listing
+  build-and-deploy:
+    name: Build and Deploy
     runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        variant: [base, python]
     
     steps:
       - name: Checkout repository
@@ -29,43 +30,89 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Generate directory listings
+      - name: Build variant ${{ matrix.variant }}
         run: |
-          # Create directory listing script
+          chmod +x scripts/build-distributions.sh
+          ./scripts/build-distributions.sh ${{ matrix.variant }}
+      
+      - name: Upload distribution artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.variant }}
+          path: distributions/
+          retention-days: 1
+  
+  generate-and-deploy:
+    name: Generate Index and Deploy
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Create deployment directory
+        run: |
+          mkdir -p deploy
+          # Copy entire repo content to deploy (file browser will use this)
+          cp -r . deploy/
+          # Remove git and workflow files from deployment
+          rm -rf deploy/.git deploy/.github deploy/.gitignore
+          echo "Created deployment directory"
+      
+      - name: Download all distribution artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/artifacts
+      
+      - name: Merge distributions
+        run: |
+          mkdir -p deploy/distributions
+          # Copy all distribution files to the correct location
+          for dir in /tmp/artifacts/dist-*/; do
+            cp "$dir"* deploy/distributions/ 2>/dev/null || true
+          done
+          echo "Merged distributions into deploy/distributions"
+          ls -lah deploy/distributions/
+      
+      - name: Generate distribution index
+        run: |
+          python3 scripts/generate_distribution_index.py deploy/distributions/
+          echo "Generated distribution index"
+      
+      - name: Generate directory listing
+        run: |
           cat > /tmp/generate_listings.py << 'EOF'
           import os
           import sys
           from pathlib import Path
           from datetime import datetime
-          import json
           
           def should_include_path(path, name):
-              """Determine if path should be included in listing."""
-              # Always include .opencode
               if name == '.opencode':
                   return True
-              
-              # Always include shared-config
               if name == 'shared-config':
                   return True
-              
-              # Always include python/
               if name == 'python':
                   return True
-              
-              # Include distributions if exists
               if name == 'distributions':
                   return True
-              
-              # Skip .git and .github
-              if name in ['.git', '.github']:
+              if name in ['.git', '.github', '.gitignore', 'node_modules', '__pycache__']:
                   return False
-              
-              # Include everything else (markdown, json, etc)
               return True
           
           def format_size(size):
-              """Format bytes to human readable."""
               for unit in ['B', 'KB', 'MB', 'GB']:
                   if size < 1024:
                       return f"{size:.1f}{unit}"
@@ -73,9 +120,7 @@ jobs:
               return f"{size:.1f}TB"
           
           def generate_file_tree(start_path, root_path, indent=0):
-              """Generate HTML file tree."""
               items = []
-              
               try:
                   entries = sorted(os.listdir(start_path))
               except PermissionError:
@@ -83,22 +128,18 @@ jobs:
               
               for entry in entries:
                   full_path = os.path.join(start_path, entry)
-                  
                   if not should_include_path(full_path, entry):
                       continue
-                  
-                  # Skip __pycache__ and node_modules
                   if entry in ['__pycache__', 'node_modules', '.git', 'venv']:
                       continue
                   
                   indent_str = "&nbsp;" * (indent * 2)
                   is_dir = os.path.isdir(full_path)
-                  
                   rel_path = os.path.relpath(full_path, root_path)
                   url = f"./{rel_path}/"
                   
                   if is_dir:
-                      items.append(f'{indent_str}📁 <a href="{url}"><strong>{entry}/</strong></a>')
+                      items.append(f'{indent_str}<strong>{entry}/</strong>')
                       items.extend(generate_file_tree(full_path, root_path, indent + 1))
                   else:
                       size = os.path.getsize(full_path)
@@ -108,8 +149,6 @@ jobs:
               return items
           
           def generate_index_html(repo_root):
-              """Generate main index.html."""
-              
               readme_path = os.path.join(repo_root, 'README.md')
               readme_content = ""
               if os.path.exists(readme_path):
@@ -208,7 +247,7 @@ jobs:
                   </div>
                   
                   <footer>
-                      <p>Repository: <a href="https://github.com/fangjun/opencode-config">fangjunzhou/opencode-config</a></p>
+                      <p>Repository: <a href="https://github.com/fangjunzhou/opencode-config">fangjunzhou/opencode-config</a></p>
                       <p><a href="./distributions/">Download Distributions</a> | <a href="./shared-config/">Shared Config</a> | <a href="./.opencode/">.opencode Directory</a></p>
                       <p style="margin-top: 20px; font-size: 12px;">Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
                   </footer>
@@ -229,14 +268,28 @@ jobs:
               print(f"Generated index.html for {repo_root}")
           EOF
           
-          python3 /tmp/generate_listings.py .
+          python3 /tmp/generate_listings.py deploy
+          echo "Generated directory listing"
       
       - name: Create .nojekyll file
         run: |
-          touch .nojekyll
+          touch deploy/.nojekyll
       
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
-          name: github-pages-listing
+          path: deploy
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      
+      - name: Print deployment summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Deployed to: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Available at:" >> $GITHUB_STEP_SUMMARY
+          echo "- Root: https://fangjunzhou.github.io/opencode-config/" >> $GITHUB_STEP_SUMMARY
+          echo "- Distributions: https://fangjunzhou.github.io/opencode-config/distributions/" >> $GITHUB_STEP_SUMMARY
