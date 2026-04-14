@@ -62,7 +62,7 @@ To use the Python variant:
 
 ```bash
 # One-liner download and extraction
-curl -fsSL https://fangjunzhou.github.io/opencode-config/distributions/opencode-python.tar.gz | tar xz
+curl -fsSL https://fangjunzhou.github.io/opencode-config/opencode-python.tar.gz | tar xz
 
 # Or setup locally
 ./scripts/setup-opencode.sh python
