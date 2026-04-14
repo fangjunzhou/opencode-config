@@ -1,0 +1,28 @@
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Generated distributions (built locally during CI)
+distributions/
+!distributions/.gitkeep
+
+# Node/Python
+node_modules/
+venv/
+__pycache__/
+*.pyc
+
+# Generated index pages (built by CI/CD)
+index.html
+
+# Temporary files
+*.tmp
+tmp/
+temp/

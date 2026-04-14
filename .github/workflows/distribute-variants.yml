@@ -1,0 +1,111 @@
+name: Build and Deploy Distribution Variants
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'shared-config/**'
+      - 'python/**'
+      - 'scripts/build-distributions.sh'
+      - 'scripts/generate_distribution_index.py'
+      - '.github/workflows/distribute-variants.yml'
+  workflow_dispatch:
+
+permissions:
+  pages: write
+  id-token: write
+  contents: read
+
+jobs:
+  build-distributions:
+    name: Build Distribution Packages
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        variant: [base, python]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Build variant distribution
+        run: |
+          chmod +x scripts/build-distributions.sh
+          ./scripts/build-distributions.sh ${{ matrix.variant }}
+      
+      - name: Upload distribution artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: distribution-${{ matrix.variant }}
+          path: distributions/
+          retention-days: 1
+  
+  create-index:
+    name: Create Distribution Index
+    needs: build-distributions
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Download all distribution artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+      
+      - name: Merge all distributions
+        run: |
+          mkdir -p distributions
+          for dir in all-artifacts/*/; do
+            cp "$dir"* distributions/ 2>/dev/null || true
+          done
+          ls -lah distributions/
+      
+      - name: Generate HTML index
+        run: |
+          python3 scripts/generate_distribution_index.py distributions/
+          ls -lah distributions/index.html
+      
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: distributions/
+  
+  deploy-distributions:
+    name: Deploy Distributions to GitHub Pages
+    needs: create-index
+    runs-on: ubuntu-latest
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}/distributions/
+    
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  notify:
+    name: Build Summary
+    needs: [build-distributions, create-index, deploy-distributions]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Build Status
+        run: |
+          echo "## Distribution Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Result**: ${{ needs.build-distributions.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Index Creation**: ${{ needs.create-index.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployment**: ${{ needs.deploy-distributions.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 **Distributions Available At**:" >> $GITHUB_STEP_SUMMARY
+          echo "https://github.com/${{ github.repository }}/deployments" >> $GITHUB_STEP_SUMMARY
