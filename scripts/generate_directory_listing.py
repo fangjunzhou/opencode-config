@@ -52,6 +52,18 @@ def markdown_to_html(markdown_text):
     in_code_block = False
     code_block_content = []
     
+    def apply_inline_formatting(text):
+        """Apply inline markdown formatting to text."""
+        # Inline code
+        text = re.sub(r'`([^`]+)`', r'<code>\1</code>', text)
+        # Bold
+        text = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', text)
+        # Italic
+        text = re.sub(r'\*([^*]+)\*', r'<em>\1</em>', text)
+        # Links
+        text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', text)
+        return text
+    
     for line in lines:
         # Code blocks
         if line.strip().startswith('```'):
@@ -74,20 +86,15 @@ def markdown_to_html(markdown_text):
             html_lines.append(f'<h3>{html_module.escape(line[3:].strip())}</h3>')
         elif line.startswith('### '):
             html_lines.append(f'<h4>{html_module.escape(line[4:].strip())}</h4>')
-        # Bold
+        # List items
         elif line.strip().startswith('- '):
-            html_lines.append(f'<li>{html_module.escape(line[2:].strip())}</li>')
+            list_content = html_module.escape(line[2:].strip())
+            list_content = apply_inline_formatting(list_content)
+            html_lines.append(f'<li>{list_content}</li>')
         # Paragraphs
         elif line.strip():
-            # Inline code
             text = html_module.escape(line.strip())
-            text = re.sub(r'`([^`]+)`', r'<code>\1</code>', text)
-            # Bold
-            text = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', text)
-            # Italic
-            text = re.sub(r'\*([^*]+)\*', r'<em>\1</em>', text)
-            # Links
-            text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', text)
+            text = apply_inline_formatting(text)
             html_lines.append(f'<p>{text}</p>')
         else:
             # Empty line
