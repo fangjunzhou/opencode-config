@@ -112,17 +112,17 @@ def generate_index(dist_dir):
         }
         
         .verify-section {
-            background: #fffbf0;
+            background: #f9f9f9;
             padding: 15px;
             border-radius: 4px;
-            border-left: 3px solid #ff9800;
             margin-top: 15px;
             font-size: 13px;
+            border-left: 3px solid #ddd;
         }
         
         .verify-label {
             font-weight: 600;
-            color: #f57c00;
+            color: #333;
             display: block;
             margin-bottom: 8px;
         }
@@ -259,7 +259,7 @@ def generate_index(dist_dir):
                 </div>
             </div>
             
-            <div class="download-label">📥 Installation (One-liner)</div>
+            <div class="download-label">Installation (One-liner)</div>
             <div class="download-section">curl -fsSL https://fangjun.github.io/opencode-config/distributions/{tarball_name} | tar xz</div>
             
             <div class="button-group">
@@ -268,7 +268,7 @@ def generate_index(dist_dir):
             </div>
             
             <div class="verify-section">
-                <span class="verify-label">🔐 Verification</span>
+                <span class="verify-label">Verification</span>
                 <p>SHA256: <code>{checksum[:32]}...</code></p>
                 <p style="margin-top: 8px;">Verify after download:</p>
                 <div class="download-section" style="margin-top: 8px;">shasum -a 256 -c {tarball_name}.sha256</div>
@@ -277,8 +277,8 @@ def generate_index(dist_dir):
 """)
     
     html_parts.append("""        <footer>
-            <p>🔗 Repository: <a href="https://github.com/fangjun/opencode-config">fangjun/opencode-config</a></p>
-            <p>📖 Documentation: <a href="https://fangjun.github.io/opencode-config/">Browse Configs</a></p>
+            <p>Repository: <a href="https://github.com/fangjun/opencode-config">fangjun/opencode-config</a></p>
+            <p>Documentation: <a href="https://fangjun.github.io/opencode-config/">Browse Configs</a></p>
         </footer>
     </div>
 </body>
@@ -290,8 +290,8 @@ def generate_index(dist_dir):
     with open(index_path, 'w') as f:
         f.write('\n'.join(html_parts))
     
-    print(f"✓ Generated index: {index_path}")
-    print(f"✓ Variants indexed: {len(variants)}")
+    print(f"Generated index: {index_path}")
+    print(f"Variants indexed: {len(variants)}")
     for variant in sorted(variants.keys()):
         print(f"  - {variant}")
 
