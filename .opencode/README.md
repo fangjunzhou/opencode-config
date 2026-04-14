@@ -1,80 +1,77 @@
-# Python OpenCode Variant
+# Shared OpenCode Configuration
 
-This directory contains Python-specific configurations and overrides for the OpenCode system.
+This directory contains the **source-of-truth** for all OpenCode configurations that are shared across all language variants.
 
 ## Structure
 
 ```
-python/
-├── commands/           # Python-specific commands
-├── agents/             # Python-specific agent overrides (optional)
-├── opencode.json       # Python-specific config overrides (optional)
-└── README.md           # This file
+shared-config/
+├── agents/              # Common agent definitions
+├── commands/            # Common commands
+├── scripts/             # Utility scripts
+├── templates/           # Template configurations for variants
+├── opencode.json        # Base OpenCode configuration
+└── README.md            # This file
 ```
 
 ## How It Works
 
-When you run:
+The `.opencode/` directory in the project root is **generated** by combining:
+
+1. All contents of this `shared-config/` directory (base)
+2. Language-specific overrides (from `python/`, `cpp/`, `go/`, etc.)
+
+### Merge Strategy
+
+When `./scripts/setup-opencode.sh python` runs:
+
+```
+shared-config/*  →  copy to .opencode/
+python/*         →  rsync to .opencode/ (overwrites shared)
+```
+
+This means:
+- Common configs are always available
+- Language variants can override specific files
+- `.opencode/` is always generated (do not edit directly)
+
+## Creating .opencode/
+
+To regenerate `.opencode/` with a specific variant:
 
 ```bash
-./scripts/setup-opencode.sh python
+./scripts/setup-opencode.sh base        # Base configs only
+./scripts/setup-opencode.sh python      # Base + Python overrides
+./scripts/setup-opencode.sh cpp         # Base + C++ overrides
 ```
 
-The system:
+## Adding New Configurations
 
-1. Copies all files from `shared-config/` to `.opencode/`
-2. Overlays all files from `python/` on top (overwrites shared)
-3. Result: `.opencode/` contains shared configs + Python-specific customizations
+To add a new shared configuration:
 
-## Python-Specific Commands
+1. Create the file in `shared-config/{agents|commands|scripts}/`
+2. Follow naming conventions (kebab-case for files)
+3. Run `./scripts/setup-opencode.sh base` to regenerate `.opencode/`
+4. Commit both the shared config and updated `.opencode/`
 
-Commands in `python/commands/` are specific to Python projects:
+## Language Variants
 
-- `add-lib.md` - Add Python library/dependencies
+Language-specific variants are stored in their own directories:
 
-These are merged with common commands from `shared-config/commands/`.
+- `python/` - Python-specific agents and commands
+- `cpp/` - C++-specific configurations
+- `go/` - Go-specific configurations
+- etc.
 
-## Python-Specific Agents
+Each variant can override or extend shared configurations.
 
-If needed, you can override or create Python-specific agents in `python/agents/`:
+## For Agents
 
-- Same format as `shared-config/agents/`
-- Will override shared agents with the same filename
-- New agents are added to the final configuration
+All configurations in this directory (and generated `.opencode/`) are publicly accessible at:
 
-## Python-Specific Config
-
-Optionally create `python/opencode.json` to override `shared-config/opencode.json`:
-
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "python": {
-    "version": "3.11+",
-    "package_manager": "pip"
-  }
-}
+```
+https://fangjunzhou.github.io/opencode-config/shared-config/
+https://fangjunzhou.github.io/opencode-config/.opencode/
 ```
 
-## Installation
-
-To use the Python variant:
-
-```bash
-# One-liner download and extraction
-curl -fsSL https://fangjunzhou.github.io/opencode-config/distributions/opencode-python.tar.gz | tar xz
-
-# Or setup locally
-./scripts/setup-opencode.sh python
-```
-
-## For Developers
-
-When adding Python-specific configs:
-
-1. Create file in appropriate subdirectory
-2. Follow the same format as shared configs
-3. Run: `./scripts/setup-opencode.sh python`
-4. Verify in `.opencode/`
-5. Test functionality
-6. Commit both the python/ file and updated `.opencode/`
+Agents can directly fetch and parse configurations via HTTP.
