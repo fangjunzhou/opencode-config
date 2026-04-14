@@ -27,11 +27,11 @@ curl -fsSL https://fangjun.github.io/opencode-config/distributions/opencode-pyth
 - `python/` - Python-specific overrides
 - `scripts/` - Build and setup automation
 - `.opencode/` - Generated merged configurations (do not edit)
-- `AGENTS.md` - Developer guide and contribution instructions
+- `DEVELOPER_GUIDE.md` - Developer guide and contribution instructions
 
 ## For Developers
 
-See AGENTS.md for:
+See DEVELOPER_GUIDE.md for:
 - Project architecture
 - How to add/edit configurations
 - Build and testing commands

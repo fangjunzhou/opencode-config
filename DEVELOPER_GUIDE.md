@@ -45,7 +45,7 @@ opencode-config/
 │   └── distribute-variants.yml        Package builds & deployment
 │
 ├── README.md                   User landing page
-├── AGENTS.md                   This file
+├── DEVELOPER_GUIDE.md          This file
 └── opencode.json               Root configuration
 ```
 
@@ -255,7 +255,7 @@ Markdown content guidelines:
 |-----------|------------|---------|
 | Agent files | snake_case.md | autobuild.md |
 | Configuration files | opencode.json or config.json | opencode.json |
-| Documentation | README.md or AGENTS.md | README.md |
+| Documentation | README.md or DEVELOPER_GUIDE.md | README.md |
 | Plan documents | kebab-case.md in .opencode/plans/ | feature-plan.md |
 
 ## Adding New Variants
