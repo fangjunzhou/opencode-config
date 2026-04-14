@@ -126,18 +126,18 @@ for variant in "${VARIANTS[@]}"; do
   ./scripts/setup-opencode.sh "${variant}" > /dev/null 2>&1
   log_success "  .opencode configured"
   
-  # Create temporary build directory
-  TEMP_BUILD=$(mktemp -d)
-  trap "rm -rf ${TEMP_BUILD}" EXIT
+   # Create temporary build directory
+   TEMP_BUILD=$(mktemp -d)
+   trap "rm -rf ${TEMP_BUILD}" EXIT
+   
+   BUILD_DIR="${TEMP_BUILD}/.opencode"
+   mkdir -p "${BUILD_DIR}"
+   
+   log_info "  Copying .opencode to build directory..."
+   cp -r "${REPO_ROOT}/.opencode"/* "${BUILD_DIR}/"
   
-  BUILD_DIR="${TEMP_BUILD}/opencode"
-  mkdir -p "${BUILD_DIR}"
-  
-  log_info "  Copying .opencode to build directory..."
-  cp -r "${REPO_ROOT}/.opencode" "${BUILD_DIR}/.opencode"
-  
-  # Add build metadata
-  cat > "${BUILD_DIR}/BUILD_INFO.txt" << EOF
+   # Add build metadata
+   cat > "${BUILD_DIR}/BUILD_INFO.txt" << EOF
 OpenCode Configuration Distribution
 ====================================
 
@@ -150,7 +150,7 @@ For installation and usage, visit:
 https://fangjunzhou.github.io/opencode-config/distributions/
 
 Quick Start:
-curl -fsSL https://fangjunzhou.github.io/opencode-config/opencode-${variant}.tar.gz | tar xz
+curl -fsSL https://fangjunzhou.github.io/opencode-config/distributions/opencode-${variant}.tar.gz | tar xz
 EOF
   
   log_success "  Added build metadata"
@@ -159,14 +159,14 @@ EOF
   TARBALL_NAME="opencode-${variant}.tar.gz"
   TARBALL_PATH="${OUTPUT_DIR}/${TARBALL_NAME}"
   
-  log_info "  Creating tarball: ${TARBALL_NAME}"
-  cd "${TEMP_BUILD}"
-  
-  # Create tarball with maximum compatibility (macOS and Linux)
-  tar -czf "${TARBALL_PATH}" opencode/ || {
-    log_error "  Failed to create tarball"
-    exit 2
-  }
+   log_info "  Creating tarball: ${TARBALL_NAME}"
+   cd "${TEMP_BUILD}"
+   
+   # Create tarball with maximum compatibility (macOS and Linux)
+   tar -czf "${TARBALL_PATH}" .opencode/ || {
+     log_error "  Failed to create tarball"
+     exit 2
+   }
   log_success "  Tarball created: ${TARBALL_NAME}"
   
   # Generate checksum for this file
@@ -210,8 +210,8 @@ for variant in "${VARIANTS[@]}"; do
     echo "Variant: ${variant}" >> "${SUMMARY_FILE}"
     echo "  File: opencode-${variant}.tar.gz (${FILE_SIZE})" >> "${SUMMARY_FILE}"
     echo "  SHA256: ${CHECKSUM}" >> "${SUMMARY_FILE}"
-    echo "  Download: https://fangjunzhou.github.io/opencode-config/opencode-${variant}.tar.gz" >> "${SUMMARY_FILE}"
-    echo "  Install: curl -fsSL https://fangjunzhou.github.io/opencode-config/opencode-${variant}.tar.gz | tar xz" >> "${SUMMARY_FILE}"
+     echo "  Download: https://fangjunzhou.github.io/opencode-config/distributions/opencode-${variant}.tar.gz" >> "${SUMMARY_FILE}"
+     echo "  Install: curl -fsSL https://fangjunzhou.github.io/opencode-config/distributions/opencode-${variant}.tar.gz | tar xz" >> "${SUMMARY_FILE}"
   fi
 done
 
