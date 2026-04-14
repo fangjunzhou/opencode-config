@@ -1,6 +1,6 @@
 ---
 description: End-to-end implementation agent that executes, validates, and researches changes
-mode: subagent
+mode: primary
 temperature: 0.1
 permission:
   read: allow
