@@ -8,18 +8,18 @@ Download and extract your configuration:
 
 Base (no language specifics):
 ```bash
-curl -fsSL https://fangjunzhou.github.io/opencode-config/opencode-base.tar.gz | tar xz
+curl -fsSL https://fangjunzhou.github.io/opencode-config/distributions/opencode-base.tar.gz | tar xz
 ```
 
 Python-specific:
 ```bash
-curl -fsSL https://fangjunzhou.github.io/opencode-config/opencode-python.tar.gz | tar xz
+curl -fsSL https://fangjunzhou.github.io/opencode-config/distributions/opencode-python.tar.gz | tar xz
 ```
 
 ## Browse
 
 - All files and configurations: https://fangjunzhou.github.io/opencode-config/
-- Download page with all variants: https://fangjunzhou.github.io/opencode-config/
+- Download page with all variants: https://fangjunzhou.github.io/opencode-config/distributions/
 
 ## Repository Layout
 

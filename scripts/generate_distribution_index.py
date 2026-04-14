@@ -260,7 +260,7 @@ def generate_index(dist_dir):
             </div>
             
             <div class="download-label">Installation (One-liner)</div>
-            <div class="download-section">curl -fsSL https://fangjunzhou.github.io/opencode-config/{tarball_name} | tar xz</div>
+            <div class="download-section">curl -fsSL https://fangjunzhou.github.io/opencode-config/distributions/{tarball_name} | tar xz</div>
             
             <div class="button-group">
                 <a href="./{tarball_name}" class="button button-primary">Direct Download</a>
