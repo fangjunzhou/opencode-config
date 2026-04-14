@@ -1,7 +1,6 @@
 ---
 description: Research-heavy planning agent that explores the codebase, searches extensively, and writes executable implementation plans
 mode: subagent
-hidden: true
 temperature: 0.1
 permission:
   read: allow
