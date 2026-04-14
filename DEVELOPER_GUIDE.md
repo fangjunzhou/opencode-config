@@ -41,8 +41,7 @@ opencode-config/
 │   └── opencode.json
 │
 ├── .github/workflows/          CI/CD automation
-│   ├── deploy-directory-listing.yml   File browser deployment
-│   └── distribute-variants.yml        Package builds & deployment
+│   └── deploy-pages.yml        Unified build and deployment workflow
 │
 ├── README.md                   User landing page
 ├── DEVELOPER_GUIDE.md          This file
@@ -71,12 +70,26 @@ When you run `./scripts/build-distributions.sh all`:
 
 ### Deployment Process
 
-GitHub Actions workflows handle deployment automatically:
+GitHub Actions workflow (`deploy-pages.yml`) handles deployment automatically:
 
-1. `deploy-directory-listing.yml` - Generates file browser, deploys to Pages root
-2. `distribute-variants.yml` - Builds distributions, deploys to Pages /distributions/ folder
+**Job 1: Build and Deploy (parallel for each variant)**
+- Checkout repository
+- Set up Python environment
+- Build base and python variants in parallel
+- Upload distribution artifacts (tar.gz, checksums)
 
-Result: All configurations accessible via HTTPS with no authentication required.
+**Job 2: Generate Index and Deploy**
+- Waits for all builds to complete
+- Copies configuration files to deployment directory
+- Downloads and merges all distribution artifacts
+- Runs `generate_distribution_index.py` to create /distributions/index.html
+- Runs `generate_directory_listing.py` to create root index.html with file browser
+- Uploads deployment to GitHub Pages
+- Deploys to production
+
+**Result**: All configurations accessible via HTTPS with no authentication required.
+- Root with file browser: https://fangjunzhou.github.io/opencode-config/
+- Downloads page: https://fangjunzhou.github.io/opencode-config/distributions/
 
 ## Build/Lint/Test Commands
 
@@ -118,8 +131,11 @@ Required fields: `description`, `mode`, `temperature`, `permission`
 # Build single variant
 ./scripts/build-distributions.sh base
 
-# Generate download index page
+# Generate distribution index page
 python3 scripts/generate_distribution_index.py distributions/
+
+# Generate root file browser index
+python3 scripts/generate_directory_listing.py .
 
 # Install dependencies
 cd .opencode && bun install
@@ -283,8 +299,11 @@ tar xz -f distributions/opencode-cpp.tar.gz -C /tmp
 
 4. Update CI/CD workflow:
 ```bash
-# Edit .github/workflows/distribute-variants.yml
-# Add 'cpp' to the matrix variants list
+# Edit .github/workflows/deploy-pages.yml
+# Add 'cpp' to the matrix variants list in the build-and-deploy job:
+# strategy:
+#   matrix:
+#     variant: [base, python, cpp]
 ```
 
 5. Commit and push:
