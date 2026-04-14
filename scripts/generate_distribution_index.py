@@ -260,7 +260,7 @@ def generate_index(dist_dir):
             </div>
             
             <div class="download-label">Installation (One-liner)</div>
-            <div class="download-section">curl -fsSL https://fangjun.github.io/opencode-config/distributions/{tarball_name} | tar xz</div>
+            <div class="download-section">curl -fsSL https://fangjunzhou.github.io/opencode-config/distributions/{tarball_name} | tar xz</div>
             
             <div class="button-group">
                 <a href="./{tarball_name}" class="button button-primary">Direct Download</a>
@@ -278,7 +278,7 @@ def generate_index(dist_dir):
     
     html_parts.append("""        <footer>
             <p>Repository: <a href="https://github.com/fangjun/opencode-config">fangjun/opencode-config</a></p>
-            <p>Documentation: <a href="https://fangjun.github.io/opencode-config/">Browse Configs</a></p>
+            <p>Documentation: <a href="https://fangjunzhou.github.io/opencode-config/">Browse Configs</a></p>
         </footer>
     </div>
 </body>

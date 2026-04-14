@@ -147,10 +147,10 @@ Built: ${BUILD_TIME}
 Build System: GitHub Actions
 
 For installation and usage, visit:
-https://fangjun.github.io/opencode-config/distributions/
+https://fangjunzhou.github.io/opencode-config/distributions/
 
 Quick Start:
-curl -fsSL https://fangjun.github.io/opencode-config/distributions/opencode-${variant}.tar.gz | tar xz
+curl -fsSL https://fangjunzhou.github.io/opencode-config/distributions/opencode-${variant}.tar.gz | tar xz
 EOF
   
   log_success "  Added build metadata"
@@ -210,8 +210,8 @@ for variant in "${VARIANTS[@]}"; do
     echo "Variant: ${variant}" >> "${SUMMARY_FILE}"
     echo "  File: opencode-${variant}.tar.gz (${FILE_SIZE})" >> "${SUMMARY_FILE}"
     echo "  SHA256: ${CHECKSUM}" >> "${SUMMARY_FILE}"
-    echo "  Download: https://fangjun.github.io/opencode-config/distributions/opencode-${variant}.tar.gz" >> "${SUMMARY_FILE}"
-    echo "  Install: curl -fsSL https://fangjun.github.io/opencode-config/distributions/opencode-${variant}.tar.gz | tar xz" >> "${SUMMARY_FILE}"
+    echo "  Download: https://fangjunzhou.github.io/opencode-config/distributions/opencode-${variant}.tar.gz" >> "${SUMMARY_FILE}"
+    echo "  Install: curl -fsSL https://fangjunzhou.github.io/opencode-config/distributions/opencode-${variant}.tar.gz | tar xz" >> "${SUMMARY_FILE}"
   fi
 done
 

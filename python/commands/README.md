@@ -31,5 +31,5 @@ When adding a new Python command:
 Agents can directly fetch Python commands:
 
 ```
-https://fangjun.github.io/opencode-config/python/commands/
+https://fangjunzhou.github.io/opencode-config/python/commands/
 ```

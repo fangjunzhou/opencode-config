@@ -70,8 +70,8 @@ Each variant can override or extend shared configurations.
 All configurations in this directory (and generated `.opencode/`) are publicly accessible at:
 
 ```
-https://fangjun.github.io/opencode-config/shared-config/
-https://fangjun.github.io/opencode-config/.opencode/
+https://fangjunzhou.github.io/opencode-config/shared-config/
+https://fangjunzhou.github.io/opencode-config/.opencode/
 ```
 
 Agents can directly fetch and parse configurations via HTTP.

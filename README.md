@@ -8,18 +8,18 @@ Download and extract your configuration:
 
 Base (no language specifics):
 ```bash
-curl -fsSL https://fangjun.github.io/opencode-config/distributions/opencode-base.tar.gz | tar xz
+curl -fsSL https://fangjunzhou.github.io/opencode-config/distributions/opencode-base.tar.gz | tar xz
 ```
 
 Python-specific:
 ```bash
-curl -fsSL https://fangjun.github.io/opencode-config/distributions/opencode-python.tar.gz | tar xz
+curl -fsSL https://fangjunzhou.github.io/opencode-config/distributions/opencode-python.tar.gz | tar xz
 ```
 
 ## Browse
 
-- All files and configurations: https://fangjun.github.io/opencode-config/
-- Download page with all variants: https://fangjun.github.io/opencode-config/distributions/
+- All files and configurations: https://fangjunzhou.github.io/opencode-config/
+- Download page with all variants: https://fangjunzhou.github.io/opencode-config/distributions/
 
 ## Repository Layout
 
@@ -44,13 +44,13 @@ Configurations are publicly accessible via HTTP:
 
 ```bash
 # Browse root
-curl https://fangjun.github.io/opencode-config/
+curl https://fangjunzhou.github.io/opencode-config/
 
 # Access agent definition
-curl https://fangjun.github.io/opencode-config/shared-config/agents/autobuild.md
+curl https://fangjunzhou.github.io/opencode-config/shared-config/agents/autobuild.md
 
 # Access variant-specific command
-curl https://fangjun.github.io/opencode-config/python/commands/add-lib.md
+curl https://fangjunzhou.github.io/opencode-config/python/commands/add-lib.md
 ```
 
 Agents can download and consume configurations directly without authentication.
